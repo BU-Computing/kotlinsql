@@ -43,7 +43,6 @@ plugins {
     id 'maven-publish'
 }
 
-apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'idea'
 apply plugin: 'net.devrieze.gradlecodegen'
@@ -53,7 +52,7 @@ ext {
     if (! rootProject.hasProperty('myJavaVersion')) { myJavaVersion = JavaVersion.VERSION_1_7 }
 }
 
-version = '0.7'
+version = '0.7.1'
 group = 'net.devrieze'
 
 
@@ -65,7 +64,7 @@ bintray {
 
     pkg {
         repo = 'maven'
-        name = 'gradle-codegen'
+        name = 'kotlinsql'
         userOrg = 'pdvrieze'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/pdvrieze/kotlinsql.git'
@@ -140,7 +139,7 @@ task sourceJar(type: Jar) {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 //    api "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     generatorsCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
