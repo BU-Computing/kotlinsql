@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016.
+ * Copyright (c) 2018.
  *
  * This file is part of ProcessManager.
  *
@@ -23,8 +23,10 @@
 buildscript {
 
     ext {
-        if (! rootProject.hasProperty('kotlin_version') ) { kotlin_version = '1.1.2-3' }
+        if (! rootProject.hasProperty('kotlin_version') ) { kotlin_version = '1.2.60' }
         if (! rootProject.hasProperty('codegen_version') ) { codegen_version = '0.5.10' }
+        if (! rootProject.hasProperty('jupiterVersion') ) { jupiterVersion = '5.2.0' }
+        if (! rootProject.hasProperty('junit5_version') ) { junit5_version = '1.2.0' }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -34,6 +36,9 @@ buildscript {
     repositories {
         mavenLocal()
         jcenter()
+        maven {
+            url='https://dl.bintray.com/kotlin/kotlin-eap-1.2'
+        }
     }
 }
 
@@ -49,17 +54,19 @@ apply plugin: 'net.devrieze.gradlecodegen'
 
 ext {
 //    if (! rootProject.hasProperty('kotlin_version') ) { kotlin_version = '1.1.2-3' }
-    if (! rootProject.hasProperty('myJavaVersion')) { myJavaVersion = JavaVersion.VERSION_1_7 }
+    if (! rootProject.hasProperty('myJavaVersion')) { myJavaVersion = JavaVersion.VERSION_1_8 }
 }
 
-version = '0.7.1'
+version = '0.7.3'
 group = 'net.devrieze'
 
 
 
 bintray {
-    user = bintrayUser
-    key = bintrayApiKey
+    if (rootProject.hasProperty('bintrayUser')) {
+        user = bintrayUser
+        key = bintrayApiKey
+    }
     publications = ['MyPublication']
 
     pkg {
@@ -71,7 +78,7 @@ bintray {
 
         version {
             name = project.version
-            desc = 'First released version. It should be stable, but it may be missing some API'
+            desc = 'Bugfix issue'
             released = new Date()
             vcsTag = "v$version"
         }
@@ -100,7 +107,7 @@ repositories {
 }
 
 test {
-    useTestNG()
+    useJUnitPlatform()
 }
 
 sourceSets {
@@ -144,7 +151,8 @@ dependencies {
 
     generatorsCompile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    testCompile 'org.testng:testng:6.9.13.8'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiterVersion"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"
 }
 
 idea{

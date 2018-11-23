@@ -20,17 +20,16 @@
 
 package uk.ac.bournemouth.kotlinsql
 
-import org.testng.Assert.assertEquals
-import org.testng.annotations.Test
-import uk.ac.bournemouth.kotlinsql.AbstractColumnConfiguration.AbstractCharColumnConfiguration.LengthCharColumnConfiguration
-import uk.ac.bournemouth.kotlinsql.ColumnType.LengthCharColumnType.VARCHAR_T
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.util.*
 
 /**
  * Created by pdvrieze on 02/04/16.
  */
-class testTableDefs {
-  object db:Database( 1)
+class TestTableDefs {
+  @Suppress("ClassName")
+  object db: Database(1)
 
   @Test
   fun testSimpleDefine() {
@@ -43,7 +42,7 @@ class testTableDefs {
       }
 
     }
-    assertEquals(test.bit.name, "bit")
+    assertEquals("bit", test.bit.name)
   }
 
   @Test
@@ -57,11 +56,12 @@ class testTableDefs {
       }
 
     }
-    assertEquals(test.bit.name, "bit")
+    assertEquals("bit", test.bit.name)
   }
 
   @Test
   fun testCustomType() {
+    @Suppress("LocalVariableName")
     val X_UUID = customType({ VARCHAR(36)}, UUID::toString, UUID::fromString)
     val test = object: MutableTable("Testq", null) {
 
@@ -72,12 +72,12 @@ class testTableDefs {
       }
 
     }
-    assertEquals(test.uuid.name, "uuid")
-    assertEquals(test.uuid.table._name, "Testq")
+    assertEquals("uuid", test.uuid.name)
+    assertEquals("Testq", test.uuid.table._name)
     val uuidString = "c5321579-770a-4d72-a6fe-71c92ad32c71"
     val myUUID = UUID.fromString(uuidString)
-    assertEquals(test.uuid.type.fromDb(uuidString), myUUID)
-    assertEquals(test.uuid.type.toDB(myUUID), uuidString)
+    assertEquals(myUUID, test.uuid.type.fromDb(uuidString))
+    assertEquals(uuidString, test.uuid.type.toDB(myUUID))
   }
 
   @Test
@@ -92,7 +92,7 @@ class testTableDefs {
     }
 
     val statement = db.SELECT(table.name).WHERE {  table.index eq 1 }
-    assertEquals(statement.toSQL(), "SELECT `name` FROM `TestMakeSQL` WHERE `index` = ?")
+    assertEquals("SELECT `name` FROM `TestMakeSQL` WHERE `index` = ?", statement.toSQL())
 
   }
 
@@ -118,12 +118,14 @@ class testTableDefs {
     }
 
     val statement = db.SELECT(persons.name, emails.email).WHERE { persons.index eq emails.index }
-    assertEquals(statement.toSQL(), "SELECT p.`name`, e.`email` FROM `emails` AS e, `persons` AS p WHERE p.`index` = e.`index`")
+    assertEquals("SELECT p.`name`, e.`email` FROM `emails` AS e, `persons` AS p WHERE p.`index` = e.`index`",
+                            statement.toSQL())
 
   }
 
   @Test
   fun testCustomReference() {
+    @Suppress("LocalVariableName")
     val X_UUID = customType({ VARCHAR(36)}, UUID::toString, UUID::fromString)
     val persons = object: MutableTable("persons", null) {
       val index by X_UUID
@@ -145,8 +147,10 @@ class testTableDefs {
     }
 
     val statement = db.SELECT(persons.name, emails.email).WHERE { persons.index eq emails.index }
-    assertEquals(statement.toSQL(), "SELECT p.`name`, e.`email` FROM `emails` AS e, `persons` AS p WHERE p.`index` = e.`index`")
+    assertEquals("SELECT p.`name`, e.`email` FROM `emails` AS e, `persons` AS p WHERE p.`index` = e.`index`",
+                            statement.toSQL())
 
   }
 
 }
+

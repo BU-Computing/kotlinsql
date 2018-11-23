@@ -18,6 +18,8 @@
  * under the License.
  */
 
+@file:Suppress("ClassName", "unused")
+
 package uk.ac.bournemouth.util.kotlin.sql
 
 import java.math.BigDecimal
@@ -25,7 +27,7 @@ import java.sql.*
 import java.util.*
 
 @Suppress("NOTHING_TO_INLINE")
-class StatementHelper constructor(val statement: PreparedStatement, val queryString:String) : PreparedStatement by statement {
+class StatementHelper constructor(val statement: PreparedStatement, private val queryString:String) : PreparedStatement by statement {
   /**
    * Get raw access to the underlying prepared statement. This should normally not be needed, but is available when it is.
    */
@@ -50,7 +52,7 @@ class StatementHelper constructor(val statement: PreparedStatement, val queryStr
   val warningsIt: Iterator<SQLWarning>
     get() = warningsIterator()
 
-  fun warningsIterator(): Iterator<SQLWarning> = object : AbstractIterator<SQLWarning>() {
+  private fun warningsIterator(): Iterator<SQLWarning> = object : AbstractIterator<SQLWarning>() {
     override fun computeNext() {
       val w = statement.warnings
       if (w != null) {
@@ -61,7 +63,7 @@ class StatementHelper constructor(val statement: PreparedStatement, val queryStr
     }
   }
 
-  @Suppress("unused")
+  @Suppress("unused", "FunctionName")
   @Deprecated("Use the columntype instead. This doesn't do nulls", ReplaceWith("ColumnType::setParam(this, index, value)"), level = DeprecationLevel.ERROR)
   fun <T> setParam_(index: Int, value: T) = when (value) {
     null -> setNull(index, Types.NULL)
@@ -101,6 +103,14 @@ class StatementHelper constructor(val statement: PreparedStatement, val queryStr
     inline operator fun plus(value: Boolean?): ParamHelper_ { sh.setParam(index++, value); return this }
     inline operator fun plus(value: Byte?): ParamHelper_ { sh.setParam(index++, value); return this }
     inline operator fun plus(value: Short?): ParamHelper_ { sh.setParam(index++, value); return this }
+
+    inline operator fun plus(intValue: Int): ParamHelper_ { sh.setInt(index++, intValue); return this }
+    inline operator fun plus(longValue: Long): ParamHelper_ { sh.setLong(index++, longValue); return this }
+      @JvmName("plusNotNull")
+    inline operator fun plus(stringValue: String): ParamHelper_ { sh.setString(index++, stringValue); return this }
+    inline operator fun plus(booleanValue: Boolean): ParamHelper_ { sh.setBoolean(index++, booleanValue); return this }
+    inline operator fun plus(byteValue: Byte): ParamHelper_ { sh.setByte(index++, byteValue); return this }
+    inline operator fun plus(shortValue: Short): ParamHelper_ { sh.setShort(index++, shortValue); return this }
   }
 
 //  inline fun <R> params(block: ParamHelper_.() -> R) = ParamHelper_(this).block()
@@ -159,13 +169,35 @@ class StatementHelper constructor(val statement: PreparedStatement, val queryStr
   /** Start setting parameters. This returns a helper for adding the next ones. */
   inline fun params(value:Short?):ParamHelper_ { setParam(1, value); return ParamHelper_(this) }
 
+  /** Start setting parameters. This returns a helper for adding the next ones. */
+  inline fun params(intValue:Int):ParamHelper_ { setInt(1, intValue); return ParamHelper_(this) }
+  /** Start setting parameters. This returns a helper for adding the next ones. */
+  inline fun params(longValue:Long):ParamHelper_ { setLong(1, longValue); return ParamHelper_(this) }
+  /** Start setting parameters. This returns a helper for adding the next ones. */
+  @JvmName("paramsNotNull")
+  inline fun params(stringValue:String):ParamHelper_ { setString(1, stringValue); return ParamHelper_(this) }
+  /** Start setting parameters. This returns a helper for adding the next ones. */
+  inline fun params(booleanValue:Boolean):ParamHelper_ { setBoolean(1, booleanValue); return ParamHelper_(this) }
+  /** Start setting parameters. This returns a helper for adding the next ones. */
+  inline fun params(byteValue:Byte):ParamHelper_ { setByte(1, byteValue); return ParamHelper_(this) }
+  /** Start setting parameters. This returns a helper for adding the next ones. */
+  inline fun params(shortValue:Short):ParamHelper_ { setShort(1, shortValue); return ParamHelper_(this) }
+
+  @Suppress("MemberVisibilityCanBePrivate")
   inline fun <R> withResultSet(block: (ResultSet) -> R) = statement.resultSet.use(block)
 
   inline fun <R> withGeneratedKeys(block: (ResultSet) -> R) = statement.generatedKeys.use(block)
 
   inline fun <R> execute(block: (ResultSet) -> R) = executeQuery().use(block)
 
-  /**
+
+  inline val Int.i get() = this
+  inline val Double.d get() = this
+  @Suppress("PropertyName")
+  inline val Long.L get() = this
+  inline val Float.f get() = this
+
+    /**
    * Execute the block for every result in the ResultSet. This is [execute] and [Sequence.forEach] combined.
    */
   inline fun <R> executeEach(block: (ResultSet) -> R): List<R> = execute { resultSet ->
